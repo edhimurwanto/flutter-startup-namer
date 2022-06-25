@@ -2,28 +2,30 @@
 
 This project is result of Flutter Tutorial provided by Flutter Codelabs.
 
-##Write your first Flutter app, part 1
-A few resources to get you started if this is your first Flutter project:
+## Basic Flutter layout concepts
+Widgets are the basic building blocks of a Flutter UI.
 
-####What you'll learn in part 1
-- How to write a Flutter app that looks natural on iOS, Android, desktop (Windows, for example) and the web
-- Basic structure of a Flutter app
-- Finding and using packages to extend functionality
-- Using hot reload for a quicker development cycle
-- How to implement a stateful widget
-- How to create an infinite, lazily loaded list
+### Row and Column classes
+- Row and Column can have multiple widgets inside called children : []
+- Row lays out its widgets horizontally
+- Column lays out its widgets vertically.
 
-##Write Your First Flutter App, part 2
+### Flexible Widgets
+The Flexible widget wraps a widget, so the widget becomes resizable. When the Flexible widget wraps a widget, the widget becomes the Flexible widget’s child and is considered flexible.
+- flex: determine priority of space
+- fit : determines whether a Flexible widget fills all of its extra space.
 
-####What you'll learn in part 2
-- How to write a Flutter app that looks natural on iOS, Android, Windows, Linux, macOS, and the web
-- How to use hot reload for a quicker development cycle
-- How to add interactivity to a stateful widget
-- How to create and navigate to a second screen
-- How to change the look of an app using themes
+### Expanded widget
+Expanded widget can wrap a widget and force the widget to fill extra space
+
+### SizedBox widget
+One of two ways to creating extra dimensions.
+
+### Spacer widget
+To create space between widgets.
 
 ### Resources
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Basic Flutter layout concepts](https://docs.flutter.dev/codelabs/layout-basics#sizedbox-widget)
 - [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
 For help getting started with Flutter, view our
