@@ -1,103 +1,117 @@
-import 'package:english_words/english_words.dart';
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_app/user_model.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Startup Name Generator',
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      )),
-      home: RandomWords(),
+      home: UserScreen(),
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
-  const RandomWords({Key? key}) : super(key: key);
+class UserScreen extends StatefulWidget {
+  const UserScreen({Key? key}) : super(key: key);
 
   @override
-  State<RandomWords> createState() => _RandomWordsState();
+  State<UserScreen> createState() => _UserScreenState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _saved = <WordPair>{};
-  final _biggerFont = const TextStyle(fontSize: 18);
+class _UserScreenState extends State<UserScreen> {
+  late Future<List<User>> users;
 
-  void _pushSaved() {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
-      final tiles = _saved.map((pair) => ListTile(
-            title: Text(
-              pair.asPascalCase,
-              style: _biggerFont,
-            ),
-          ));
-      final divided = tiles.isNotEmpty
-          ? ListTile.divideTiles(context: context, tiles: tiles).toList()
-          : <Widget>[];
+  @override
+  void initState() {
+    super.initState();
+    users = fetchUser();
+  }
 
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Saved Suggestions'),
-        ),
-        body: ListView(children: divided),
-      );
-    }));
+  Future<List<User>> fetchUser() async {
+    var resp =
+        await http.get(Uri.parse('https://gorest.co.in/public/v2/users'));
+    if (resp.statusCode == 200) {
+      var jsonData = jsonDecode(resp.body);
+      List<User> users = [];
+      for (var user in jsonData) {
+        User u = User.fromJson(user);
+        users.add(u);
+      }
+      return users;
+    } else {
+      throw Exception('Failed to load city');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Startup Name Generator'),
-          actions: [
-            IconButton(
-              onPressed: _pushSaved,
-              icon: const Icon(Icons.list),
-              tooltip: 'Saved Suggestions',
-            )
-          ],
+    return CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          middle: const Text('CRUD User'),
+          trailing: Icon(
+            Icons.add_rounded,
+            size: 24,
+          ),
         ),
-        body: ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemBuilder: (context, i) {
-              if (i.isOdd) return const Divider();
-
-              final index = i ~/ 2;
-              if (index >= _suggestions.length) {
-                _suggestions.addAll(generateWordPairs().take(10));
-              }
-
-              final alreadySaved = _saved.contains(_suggestions[index]);
-
-              return ListTile(
-                title: Text(
-                  _suggestions[index].asPascalCase,
-                  style: _biggerFont,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 15.0, right: 15.0, top: 15.0),
+                child: CupertinoSearchTextField(
+                  placeholder: 'Search User',
                 ),
-                trailing: Icon(
-                  alreadySaved ? Icons.favorite : Icons.favorite_border,
-                  color: alreadySaved ? Colors.red : null,
-                  semanticLabel: alreadySaved ? 'Remove from saved' : 'Save',
-                ),
-                onTap: () {
-                  setState(() {
-                    if (alreadySaved) {
-                      _saved.remove(_suggestions[index]);
-                    } else {
-                      _saved.add(_suggestions[index]);
-                    }
-                  });
-                },
-              );
-            }));
+              ),
+              Expanded(
+                child: FutureBuilder<List<User>>(
+                    future: users,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) => Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Name ${snapshot.data![index].name}'),
+                                    Text(
+                                        'Email ${snapshot.data![index].email}'),
+                                    Text(
+                                        'Gender ${snapshot.data![index].gender}'),
+                                    Text(
+                                        'Status ${snapshot.data![index].status}'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+
+                      return const Text(
+                        'Loading...',
+                        style: TextStyle(fontSize: 14, color: Colors.blue),
+                      );
+                    }),
+              ),
+            ],
+          ),
+        ));
   }
 }
