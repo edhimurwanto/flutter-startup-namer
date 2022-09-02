@@ -19,14 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Consumer<AuthProvider>(
-          builder: (BuildContext context, authState, child) {
-        if (authState.isLoggedId) {
-          return HomeScreen();
-        } else {
-          return LoginScreen();
-        }
-      }),
+      home: LoginScreen()
     );
   }
 }
